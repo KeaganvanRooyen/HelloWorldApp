@@ -18,20 +18,17 @@ jobs:
         with:
           dotnet-version: '6.x' # Replace with your .NET version
 
-      - name: Change directory to src
-        run: cd src
-
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore src/HelloWorldApp.csproj
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build src/HelloWorldApp.csproj --no-restore
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test src/HelloWorldApp.csproj --no-build --verbosity normal
 
       - name: Code Coverage
-        run: dotnet test --collect:"XPlat Code Coverage"
+        run: dotnet test src/HelloWorldApp.csproj --collect:"XPlat Code Coverage"
 
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v3
