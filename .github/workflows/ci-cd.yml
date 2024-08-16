@@ -16,7 +16,10 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.x' # or your .NET version
+          dotnet-version: '6.x' # Replace with your .NET version
+
+      - name: Change directory to src
+        run: cd src
 
       - name: Install dependencies
         run: dotnet restore
@@ -27,5 +30,33 @@ jobs:
       - name: Test
         run: dotnet test --no-build --verbosity normal
 
-      - name: Deploy
+      - name: Code Coverage
+        run: dotnet test --collect:"XPlat Code Coverage"
+
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: coverage.cobertura.xml
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Staging
         run: echo "Deploy stage - Add your deploy commands here"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]
+    if: failure()
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,commit
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
